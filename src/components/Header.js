@@ -8,10 +8,10 @@ import {
     Nav,
     NavItem,
     NavLink,
-    NavbarText,
-    Badge,
-    Button
+    Badge
 } from "reactstrap";
+
+import { NavLink as RRNavLink } from "react-router-dom";
 import { connect } from "react-redux";
 
 function Header(props) {
@@ -22,20 +22,16 @@ function Header(props) {
     return (
         <header>
             <Navbar color="light" light expand="md">
-                <NavbarBrand href="/">reactstrap</NavbarBrand>
+                <NavbarBrand to="/" exact tag={RRNavLink}>reactstrap</NavbarBrand>
                 <NavbarToggler onClick={toggle} />
                 <Collapse isOpen={isOpen} navbar>
-                    <Nav className="mr-auto" navbar>
+                    <Nav className="ml-auto" navbar>
                         <NavItem>
-                            <NavLink href="/components/">Components</NavLink>
+                            <NavLink to="/cart" exact tag={RRNavLink}>
+                                Your cart <Badge>{props.cart.length}</Badge>
+                            </NavLink>
                         </NavItem>
                     </Nav>
-                    <NavbarText>
-                        <Button color="primary" outline>
-                            Your cart{" "}
-                            <Badge color="secondary">{props.cart.length}</Badge>
-                        </Button>
-                    </NavbarText>
                 </Collapse>
             </Navbar>
         </header>
@@ -45,7 +41,7 @@ function Header(props) {
 const mapStateToProps = (state, ownProps) => {
     return {
         cart: state
-    }
-}
+    };
+};
 
 export default connect(mapStateToProps)(Header);

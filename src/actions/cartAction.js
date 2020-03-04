@@ -8,10 +8,10 @@ const addItem = item => {
     };
 };
 
-const removeItem = index => {
+const removeItem = id => {
     return {
         type: REMOVE_ITEM,
-        index
+        id
     };
 };
 
