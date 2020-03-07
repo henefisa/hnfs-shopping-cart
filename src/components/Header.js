@@ -8,13 +8,14 @@ import {
     Nav,
     NavItem,
     NavLink,
-    Badge
+    Badge,
+    Container
 } from "reactstrap";
 
 import { NavLink as RRNavLink } from "react-router-dom";
 import { connect } from "react-redux";
 
-function Header(props) {
+function Header({ cart }) {
     const [isOpen, setIsOpen] = useState(false);
 
     const toggle = () => setIsOpen(!isOpen);
@@ -22,17 +23,21 @@ function Header(props) {
     return (
         <header>
             <Navbar color="light" light expand="md">
-                <NavbarBrand to="/" exact tag={RRNavLink}>reactstrap</NavbarBrand>
-                <NavbarToggler onClick={toggle} />
-                <Collapse isOpen={isOpen} navbar>
-                    <Nav className="ml-auto" navbar>
-                        <NavItem>
-                            <NavLink to="/cart" exact tag={RRNavLink}>
-                                Your cart <Badge>{props.cart.length}</Badge>
-                            </NavLink>
-                        </NavItem>
-                    </Nav>
-                </Collapse>
+                <Container>
+                    <NavbarBrand to="/" exact tag={RRNavLink}>
+                        reactstrap
+                    </NavbarBrand>
+                    <NavbarToggler onClick={toggle} />
+                    <Collapse isOpen={isOpen} navbar>
+                        <Nav className="ml-auto" navbar>
+                            <NavItem>
+                                <NavLink to="/cart" exact tag={RRNavLink}>
+                                    Your cart <Badge>{cart.length}</Badge>
+                                </NavLink>
+                            </NavItem>
+                        </Nav>
+                    </Collapse>
+                </Container>
             </Navbar>
         </header>
     );
@@ -40,7 +45,7 @@ function Header(props) {
 
 const mapStateToProps = (state, ownProps) => {
     return {
-        cart: state
+        cart: state.cart
     };
 };
 

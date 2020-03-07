@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     Card,
     CardImg,
@@ -6,100 +6,139 @@ import {
     CardBody,
     CardTitle,
     Button,
-    Container
+    Container,
+    Spinner,
+    Pagination,
+    PaginationItem,
+    PaginationLink
 } from "reactstrap";
 import { connect } from "react-redux";
 
 import "../styles/main.css";
 
 import { addItem } from "../actions/cartAction.js";
+import { getProducts } from "../actions/getProductsAction";
 
-const data = [
-    {
-        id: 1,
-        src: "http://dummyimage.com/300x200.png/ff4444/ffffff",
-        title: "Soldiers of Fortune",
-        text: "Propithecus verreauxi"
-    },
-    {
-        id: 2,
-        src: "http://dummyimage.com/300x200.png/5fa2dd/ffffff",
-        title: "Hollywood and The Pentagon: A Dangerous Liaison",
-        text: "Chlidonias leucopterus"
-    },
-    {
-        id: 3,
-        src: "http://dummyimage.com/300x200.png/cc0000/ffffff",
-        title: "Horrible Way to Die, A ",
-        text: "Anas punctata"
-    },
-    {
-        id: 4,
-        src: "http://dummyimage.com/300x200.png/ff4444/ffffff",
-        title: "Kill the Irishman",
-        text: "Raphicerus campestris"
-    },
-    {
-        id: 5,
-        src: "http://dummyimage.com/300x200.png/cc0000/ffffff",
-        title: "Race for Your Life, Charlie Brown",
-        text: "Papio cynocephalus"
-    },
-    {
-        id: 6,
-        src: "http://dummyimage.com/300x200.png/5fa2dd/ffffff",
-        title:
-            "Black Magic Rites & the Secret Orgies of the 14th Century (Riti, magie nere e segrete orge nel trecento...)",
-        text: "Oxybelis fulgidus"
-    },
-    {
-        id: 7,
-        src: "http://dummyimage.com/300x200.png/dddddd/000000",
-        title: "Attack the Block",
-        text: "Loxodonta africana"
-    },
-    {
-        id: 8,
-        src: "http://dummyimage.com/300x200.png/5fa2dd/ffffff",
-        title: "Man with Bogart's Face, The",
-        text: "Potos flavus"
-    },
-    {
-        id: 9,
-        src: "http://dummyimage.com/300x200.png/cc0000/ffffff",
-        title: "Tree, The",
-        text: "Spilogale gracilis"
-    },
-    {
-        id: 10,
-        src: "http://dummyimage.com/300x200.png/ff4444/ffffff",
-        title: "Small Change (Argent de poche, L')",
-        text: "Macropus fuliginosus"
+function Main({ products, getProducts, addToCart }) {
+    const [currentPage, setCurrentPage] = useState(0);
+
+    useEffect(() => {
+        getProducts();
+    }, [getProducts]);
+
+    const pageSize = 40;
+    const pageCount = products.data.length / pageSize;
+    
+    if (products.loading) {
+        return (
+            <div className="loading">
+                <Spinner color="primary" />
+            </div>
+        );
     }
-];
 
-function Main(props) {
-    const [products, setProducts] = useState(data);
+    const handleChangePage = (event, index) => {
+        event.preventDefault();
+        setCurrentPage(index);
+    };
 
     return (
         <div className="main">
             <Container className="main-container">
-                {products.map(product => {
-                    return (
-                        <Card key={product.id}>
-                            <CardImg top width="100%" src={product.src} />
-                            <CardBody>
-                                <CardTitle>{product.title}</CardTitle>
-                                <CardText>{product.text}</CardText>
-                                <Button
-                                    onClick={() => props.addToCart(product)}
+                <div className="pagination-wrapper">
+                    <Pagination>
+                        <PaginationItem disabled={currentPage <= 0}>
+                            <PaginationLink
+                                previous
+                                href="#"
+                                onClick={event =>
+                                    handleChangePage(event, currentPage - 1)
+                                }
+                            />
+                        </PaginationItem>
+                        {[...Array(pageCount)].map((page, index) => {
+                            return (
+                                <PaginationItem
+                                    active={index === currentPage}
+                                    key={index}
                                 >
-                                    Add to Cart
-                                </Button>
-                            </CardBody>
-                        </Card>
-                    );
-                })}
+                                    <PaginationLink
+                                        href="#"
+                                        onClick={event =>
+                                            handleChangePage(event, index)
+                                        }
+                                    >
+                                        {index + 1}
+                                    </PaginationLink>
+                                </PaginationItem>
+                            );
+                        })}
+                        <PaginationItem disabled={currentPage >= pageCount - 1}>
+                            <PaginationLink
+                                next
+                                href="#"
+                                onClick={event =>
+                                    handleChangePage(event, currentPage + 1)
+                                }
+                            />
+                        </PaginationItem>
+                    </Pagination>
+                </div>
+                {products.data
+                    .slice(currentPage * pageSize, (currentPage + 1) * pageSize)
+                    .map(product => {
+                        return (
+                            <Card key={product.id}>
+                                <CardImg top width="100%" src={product.src} />
+                                <CardBody>
+                                    <CardTitle>{product.title}</CardTitle>
+                                    <CardText>{product.text}</CardText>
+                                    <Button onClick={() => addToCart(product)}>
+                                        Add to Cart
+                                    </Button>
+                                </CardBody>
+                            </Card>
+                        );
+                    })}
+                <div className="pagination-wrapper">
+                    <Pagination>
+                        <PaginationItem disabled={currentPage <= 0}>
+                            <PaginationLink
+                                previous
+                                href="#"
+                                onClick={event =>
+                                    handleChangePage(event, currentPage - 1)
+                                }
+                            />
+                        </PaginationItem>
+                        {[...Array(pageCount)].map((page, index) => {
+                            return (
+                                <PaginationItem
+                                    active={index === currentPage}
+                                    key={index}
+                                >
+                                    <PaginationLink
+                                        href="#"
+                                        onClick={event =>
+                                            handleChangePage(event, index)
+                                        }
+                                    >
+                                        {index + 1}
+                                    </PaginationLink>
+                                </PaginationItem>
+                            );
+                        })}
+                        <PaginationItem disabled={currentPage >= pageCount - 1}>
+                            <PaginationLink
+                                next
+                                href="#"
+                                onClick={event =>
+                                    handleChangePage(event, currentPage + 1)
+                                }
+                            />
+                        </PaginationItem>
+                    </Pagination>
+                </div>
             </Container>
         </div>
     );
@@ -107,13 +146,14 @@ function Main(props) {
 
 const mapStateToProps = (state, ownProps) => {
     return {
-        products: state
+        products: state.products
     };
 };
 
 const mapDispatchToProps = dispatch => {
     return {
-        addToCart: product => dispatch(addItem(product))
+        addToCart: product => dispatch(addItem(product)),
+        getProducts: () => dispatch(getProducts())
     };
 };
 
