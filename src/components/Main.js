@@ -12,23 +12,47 @@ import {
     PaginationItem,
     PaginationLink
 } from "reactstrap";
-import { connect } from "react-redux";
+// import { connect } from "react-redux";
 
 import "../styles/main.css";
 
 import { addItem } from "../actions/cartAction.js";
-import { getProducts } from "../actions/getProductsAction";
+// import { getProducts } from "../actions/getProductsAction";
 
-function Main({ products, getProducts, addToCart }) {
+import { useCart } from "../context/CartContext";
+
+import {
+    getProducts,
+    getProductsFailed,
+    getProductsSuccess
+} from "../actions/getProductsAction";
+
+function Main() {
     const [currentPage, setCurrentPage] = useState(0);
+    const { cartDispatch, products, productsDispatch } = useCart();
+    
+    // useEffect(() => {
+    //     getProducts();
+    // }, [getProducts]);
 
     useEffect(() => {
-        getProducts();
-    }, [getProducts]);
+        productsDispatch(getProducts());
+        const fetchData = async () => {
+            try {
+                const result = await (
+                    await fetch("http://localhost:3001/products")
+                ).json();
+                productsDispatch(getProductsSuccess(result));
+            } catch (e) {
+                productsDispatch(getProductsFailed(e.message));
+            }
+        };
+        fetchData();
+    }, [productsDispatch]);
 
     const pageSize = 40;
     const pageCount = products.data.length / pageSize;
-    
+
     if (products.loading) {
         return (
             <div className="loading">
@@ -93,7 +117,11 @@ function Main({ products, getProducts, addToCart }) {
                                 <CardBody>
                                     <CardTitle>{product.title}</CardTitle>
                                     <CardText>{product.text}</CardText>
-                                    <Button onClick={() => addToCart(product)}>
+                                    <Button
+                                        onClick={() =>
+                                            cartDispatch(addItem(product))
+                                        }
+                                    >
                                         Add to Cart
                                     </Button>
                                 </CardBody>
@@ -144,17 +172,19 @@ function Main({ products, getProducts, addToCart }) {
     );
 }
 
-const mapStateToProps = (state, ownProps) => {
-    return {
-        products: state.products
-    };
-};
+export default Main;
 
-const mapDispatchToProps = dispatch => {
-    return {
-        addToCart: product => dispatch(addItem(product)),
-        getProducts: () => dispatch(getProducts())
-    };
-};
+// const mapStateToProps = (state, ownProps) => {
+//     return {
+//         products: state.products
+//     };
+// };
 
-export default connect(mapStateToProps, mapDispatchToProps)(Main);
+// const mapDispatchToProps = dispatch => {
+//     return {
+//         addToCart: product => dispatch(addItem(product)),
+//         getProducts: () => dispatch(getProducts())
+//     };
+// };
+
+// export default connect(mapStateToProps, mapDispatchToProps)(Main);
